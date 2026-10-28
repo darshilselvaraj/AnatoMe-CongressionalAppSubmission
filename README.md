@@ -11,7 +11,6 @@ rundown.html     (Warm-up quiz, game, final quiz, and results),
 progress.html    (Learner progress page),
 script.js        (Dashboard and account logic),
 images/          (Skin layer pictures used in the game),
-svgs/            (Labeled and unlabeled tissue diagrams),
 
 
 Created by Darshil Selvaraj
