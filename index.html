@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnatoMe</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dosis:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /*
+        ========================================
+        CSS Custom Properties (Base Theme)
+        ========================================
+        */
+        :root {
+            --color-background: #314965;
+            --color-text-primary: #f1f3f8;
+            --color-text-secondary: #b7bfce;
+            --color-primary: #4b8ff7;
+            --color-primary-hover: #3475dc;
+            --color-border: #4a607a;
+            --color-page: #1d2a3d;
+            --color-soft-blue: #26364d;
+
+            --font-family-sans-serif: "Dosis", Arial, sans-serif;
+            --font-weight-medium: 500;
+
+            --navbar-height: 70px;
+            --navbar-padding: 1.5rem;
+            --container-width: 1140px;
+            --border-radius: 6px;
+            --transition-speed: 0.3s;
+        }
+        /*
+        ========================================
+        Global Resets & Base Styles
+        ========================================
+        */
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: var(--font-family-sans-serif);
+            color: var(--color-text-primary);
+            background-color: var(--color-page);
+        }
+        .content {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            width: min(100% - 3rem, var(--container-width));
+            margin: 0 auto;
+            padding: 3rem 0;
+            line-height: 1.7;
+        }
+        .welcome-text {
+            flex: 1;
+            min-width: 0;
+        }
+        .welcome-text > h2 {
+            margin-top: 0;
+        }
+        .blue-highlight {
+            color: var(--color-primary);
+        }
+        .welcome-text p {
+            max-width: 100%;
+        }
+        .progress-panel {
+            flex: 1;
+            min-width: 0;
+            padding: 1.25rem;
+            border: 1px solid var(--color-border);
+            border-radius: var(--border-radius);
+            background: var(--color-background);
+        }
+        .progress-panel h2 {
+            margin-top: 0;
+        }
+        .progress-panel progress {
+            width: 100%;
+            accent-color: var(--color-primary);
+        }
+        .reset-progress-button {
+            margin: 0;
+            padding: 0.6rem 1rem;
+            border: 1px solid #e16c7a;
+            border-radius: 999px;
+            background: var(--color-background);
+            color: #ff8996;
+            font: inherit;
+            cursor: pointer;
+        }
+        .page-footer {
+            display: flex;
+            justify-content: flex-end;
+            padding: 1rem 1.5rem;
+        }
+        .reset-progress-button:hover {
+            background: #432d37;
+        }
+        .section { scroll-margin-top: var(--navbar-height); }
+        .container { width: min(100% - 3rem, var(--container-width)); margin: 0 auto; }
+        .how-grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1rem; 
+        }
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1rem;
+        }
+        .how-card { 
+            min-width: 0; 
+            padding: 1.25rem; 
+            border: 1px solid var(--color-border); 
+            border-radius: var(--border-radius); 
+            background: var(--color-background); 
+            overflow-wrap: anywhere; 
+        }
+        .how-card__num { 
+            display: inline-grid; 
+            width: 2rem; 
+            aspect-ratio: 1; 
+            place-items: center; 
+            border-radius: 50%; 
+            background: var(--color-soft-blue); 
+            color: var(--color-primary); 
+            font-weight: var(--font-weight-medium); 
+        }
+        .module-card { 
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            min-width: 0; 
+            padding: 1.25rem; 
+            border: 1px solid var(--color-border); 
+            border-radius: var(--border-radius); 
+            background: var(--color-background); 
+            color: #fff;
+            overflow-wrap: anywhere; 
+        }
+        .module-card__completion {
+            position: absolute;
+            top: 1.25rem;
+            right: 1.25rem;
+            color: #fff;
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-align: right;
+        }
+        .module-card_num { 
+            display: inline-grid; 
+           flex: 0 0 3rem;
+           width: 3rem;
+           height: 3rem;
+           aspect-ratio: 1; 
+           place-items: center; 
+           border-radius: 50%; 
+           background: var(--color-soft-blue); 
+           color: var(--color-primary); 
+           font-weight: var(--font-weight-medium); 
+           font-size: 2rem;
+        }
+        .module-card h3 {
+            margin: 0.75rem 0 0.5rem;
+        }
+        .module-card p {
+            margin: 0;
+            line-height: 1.6;
+        }
+        .module-card__button {
+            align-self: flex-start;
+            min-height: 48px;
+            min-width: min(100%, 230px);
+            margin-top: 1rem;
+            padding: 0.7rem 1.25rem;
+            border: 1px solid transparent;
+            border-radius: 999px;
+            background: var(--color-primary);
+            color: #fff;
+            font: inherit;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+        }
+        .module-card__button:hover {
+            background: var(--color-primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+        }
+        .module-card__button:focus-visible {
+            outline: 3px solid #fff;
+            outline-offset: 3px;
+        }
+        .module-card__button:disabled {
+            border-color: #8b9bb0;
+            background: #52657e;
+            color: #fff;
+            opacity: 1;
+            cursor: default;
+            transform: none;
+            box-shadow: none;
+        }
+        .steps {
+            display: grid;
+            gap: 0.5rem;
+            margin: auto 0 0;
+            padding: 1rem 0 0;
+            list-style: none;
+        }
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--color-text-secondary);
+        }
+        .module-card .step,
+        .module-card .step__score {
+            color: #e8eef7;
+        }
+        .step__num {
+            display: inline-grid;
+            flex: 0 0 2rem;
+            width: 2rem;
+            aspect-ratio: 1;
+            place-items: center;
+            border: 1px solid var(--color-border);
+            border-radius: 50%;
+            color: var(--color-primary);
+            font-weight: var(--font-weight-medium);
+        }
+        .step__num.is-done {
+            border-color: #48c99a;
+            background: #203c36;
+            color: #82e5bc;
+        }
+        .step__score {
+            margin-left: auto;
+            color: var(--color-text-secondary);
+            font-size: 1rem;
+            text-align: right;
+        }
+        .how-card h3 { 
+            margin: 0.75rem 0 0.5rem; 
+        }
+        .how-card p { 
+            margin: 0; 
+            line-height: 1.6; 
+        }
+        .content h1 { 
+            margin-top: 0; 
+        }
+        ul { 
+            list-style: none; margin: 0; padding: 0; 
+        }
+        a { 
+            text-decoration: none; 
+            color: var(--color-text-secondary); 
+            transition: color var(--transition-speed) ease; 
+        }
+        a:hover, a:focus { 
+            color: var(--color-primary); 
+        }
+        
+        /*
+        ========================================
+        Main Navbar Structure & Animation
+        ========================================
+        */
+        .navbar {
+            /* Position sticky allows the transform to work while still being "stuck" */
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            
+            height: var(--navbar-height);
+            display: flex; align-items: center;
+            background-color: var(--color-background);
+            border-bottom: 1px solid var(--color-border);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+            
+            /* Core animation logic */
+            transform: translateY(0);
+            transition: transform var(--transition-speed) ease-in-out;
+        }
+
+        /* This class, added via JS, is what hides the navbar */
+        .navbar.is-hidden {
+            transform: translateY(-100%);
+        }
+
+        .navbar__container { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: var(--container-width); margin: 0 auto; padding: 0 var(--navbar-padding); }
+        .navbar__brand { display: inline-flex; align-items: baseline; gap: 0.2rem; color: var(--color-text-primary); }
+        .navbar__brand-logo { display: block; width: 190px; max-width: 100%; height: 56px; object-fit: contain; object-position: center; }
+        .navbar__brand-demo { margin-left: -35px; font-size: 0.85em; vertical-align: sub; letter-spacing: 0.04em; }
+
+        /*
+        ========================================
+        Mobile Menu & Toggle
+        ========================================
+        */
+        .navbar__toggle { display: block; border: 1px solid var(--color-border); border-radius: var(--border-radius); padding: 0.25rem 0.75rem; background: transparent; cursor: pointer; }
+        .navbar__toggle .bar { display: block; width: 22px; height: 2px; margin: 6px 0; background-color: var(--color-text-primary); transition: transform var(--transition-speed) ease; }
+        .navbar__toggle.is-active .bar:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+        .navbar__toggle.is-active .bar:nth-child(2) { opacity: 0; }
+        .navbar__toggle.is-active .bar:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+        .navbar__menu {
+            display: none; flex-direction: column; position: absolute; top: 100%; left: 0;
+            width: 100%; background-color: var(--color-background);
+            border-bottom: 1px solid var(--color-border); z-index: 999;
+        }
+        .navbar__menu.is-active { display: flex; }
+        .navbar__item { text-align: center; border-top: 1px solid var(--color-border); }
+        .navbar__link { display: block; padding: 1.25rem; font-weight: var(--font-weight-medium); }
+        .navbar__coming-soon {
+            display: block;
+            width: 100%;
+            padding: 1.25rem;
+            border: 0;
+            background: transparent;
+            color: var(--color-text-secondary);
+            font: inherit;
+            font-weight: var(--font-weight-medium);
+            cursor: not-allowed;
+            opacity: 0.75;
+        }
+        .profile-menu-item { position: relative; }
+        .profile-button {
+            display: inline-grid;
+            width: 2.75rem;
+            height: 2.75rem;
+            padding: 0.35rem;
+            place-items: center;
+            border: 1px solid var(--color-border);
+            border-radius: 50%;
+            background: var(--color-background);
+            cursor: pointer;
+        }
+        .profile-button img { width: 100%; height: 100%; object-fit: contain; }
+        .profile-button:focus-visible,
+        .profile-menu button:focus-visible {
+            outline: 2px solid var(--color-primary);
+            outline-offset: 2px;
+        }
+        .profile-menu {
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            right: 0;
+            z-index: 1001;
+            width: 190px;
+            padding: 0.35rem;
+            border: 1px solid var(--color-border);
+            border-radius: 10px;
+            background: var(--color-background);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+        .profile-menu[hidden] { display: none; }
+        .profile-menu button {
+            width: 100%;
+            padding: 0.75rem;
+            border: 0;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--color-text-primary);
+            font: inherit;
+            text-align: left;
+            cursor: pointer;
+        }
+        .profile-menu button:hover { background: var(--color-soft-blue); }
+        .account-dialog {
+            width: min(100% - 2rem, 420px);
+            padding: 1.5rem;
+            border: 0;
+            border-radius: 16px;
+            background: var(--color-background);
+            color: var(--color-text-primary);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+        }
+        .account-dialog::backdrop { background: rgba(10, 14, 22, 0.7); }
+        .account-dialog h2 { margin-top: 0; }
+        .account-dialog button {
+            padding: 0.6rem 1rem;
+            border: 0;
+            border-radius: 8px;
+            background: var(--color-primary);
+            color: #fff;
+            font: inherit;
+            cursor: pointer;
+        }
+
+        :is(.navbar__toggle, .navbar__link):focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; border-radius: var(--border-radius); }
+        
+        /*
+        ========================================
+        Desktop Navbar Styles
+        ========================================
+        */
+        @media (min-width: 768px) {
+            .navbar__toggle { 
+                display: none; 
+            }
+            .navbar__menu { 
+                display: flex; 
+                flex-direction: row; 
+                align-items: center; 
+                position: static; 
+                width: auto; 
+                background: none; 
+                border: none; 
+            }
+            .navbar__list { 
+                display: flex; 
+                align-items: center;
+                gap: 1.5rem; 
+            }
+            .navbar__item { 
+                border: none; 
+            }
+            .navbar__link { 
+                font-weight: var(--font-weight-medium); 
+                padding: 0.5rem 0; 
+            }
+            .navbar__coming-soon {
+                width: auto;
+                padding: 0.5rem 0;
+            }
+            .profile-menu-item { display: flex; align-items: center; }
+        }
+
+        @media (max-width: 700px) {
+            .content {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .how-grid { 
+                grid-auto-flow: column; 
+                grid-auto-columns: minmax(240px, 80%); 
+                grid-template-columns: none; 
+                overflow-x: auto;
+                padding-bottom: 0.75rem; 
+                scroll-snap-type: x mandatory; 
+            }
+            .how-card { 
+                scroll-snap-align: start; 
+            }
+            .modules-grid { 
+                grid-auto-flow: column; 
+                grid-auto-columns: minmax(240px, 80%); 
+                grid-template-columns: none; 
+                overflow-x: auto; 
+                padding-bottom: 0.75rem; 
+                scroll-snap-type: x mandatory; 
+            }
+            .module-card { 
+                scroll-snap-align: start; 
+            }
+        }
+
+        /*
+        ========================================
+        Accessibility: Prefers Reduced Motion
+        ========================================
+        */
+        @media (prefers-reduced-motion: reduce) {
+            .navbar {
+                transition: none; /* Disable the slide animation */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="navbar" id="main-navbar">
+        <div class="navbar__container">
+            <a href="#" class="navbar__brand" aria-label="AnatoMe DEMO">
+                <img class="navbar__brand-logo" src="AnatoMe-logo.png" alt="AnatoMe">
+                <span class="navbar__brand-demo">DEMO</span>
+            </a>
+            <button class="navbar__toggle" id="navbarToggle" aria-label="Toggle navigation" aria-controls="navbarMenu" aria-expanded="false">
+                <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+            </button>
+            <nav id="navbarMenu" class="navbar__menu" role="navigation">
+                <ul class="navbar__list">
+                <li class="navbar__item">
+                    <button class="navbar__coming-soon" type="button" disabled aria-disabled="true">Versus Mode (Coming Soon!)</button>
+                </li>
+                <li class="navbar__item"><a href="progress.html" class="navbar__link">Learner Progress</a></li>
+                <li class="navbar__item"><a href="#top" class="navbar__link">Dashboard</a></li>
+                    <li class="navbar__item"><a href="#modules" class="navbar__link">Modules</a></li>
+                    <li class="navbar__item"><a href="#how" class="navbar__link">How It Works</a></li>
+                    <li class="navbar__item profile-menu-item">
+                        <button class="profile-button" id="profileButton" type="button"
+                            aria-label="Open profile menu" aria-expanded="false" aria-controls="profileMenu">
+                            <img src="png-clipart-computer-icons-button-user-avatar-button-white-vector-icons.png"
+                                alt="">
+                        </button>
+                        <div class="profile-menu" id="profileMenu" hidden>
+                            <button type="button" data-account-view="summary">My Account</button>
+                            <button type="button" data-account-view="details">Account Details</button>
+                            <button type="button" id="signOutButton">Sign Out</button>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <dialog class="account-dialog" id="accountDialog">
+        <h2 id="accountDialogTitle"></h2>
+        <p id="accountDialogText"></p>
+        <button id="closeAccountDialog" type="button">Close</button>
+    </dialog>
+
+    <main class="content" id="top">
+        <div class="welcome-text">
+            <h2>AnatoMe Dashboard</h2>
+            <h1>Explore the human body through the lens of a surgeon, <span class="blue-highlight">one challenge</span> at a time.</h1>
+            <p>Each module starts with a quick warm-up quiz, testing your prior knowledge, 
+                then an interactive game, and a final quiz so you can see how much you've learned from your previous knowledge!</p>
+        </div>
+        <aside class="progress-panel" aria-labelledby="progress-title">
+            <h2 id="progress-title">Module Progress</h2>
+            <progress id="moduleProgress" value="0" max="100" aria-label="Module progress: 0% complete"></progress>
+            <p id="progressMessage">Complete learning steps to increase your progress.</p>
+            <p id="progressCount">Progress: 0% complete (0 of 15 steps)</p>
+        </aside>
+    </main>
+
+        <section class="section" id="modules">
+            <div class="container">
+                <h2 class="section__title">Modules</h2>
+                <div class="modules-grid" id="modulesGrid">
+                    <div class="module-card" data-module-content="available" data-module-id="tissue-layers">
+                        <span class="module-card__completion" data-module-completion>0% complete</span>
+                        <span class="module-card_num">🔬</span>
+                        <h3>Tissue Layers</h3>
+                        <p>Peel back and examine the body layer by layer, from skin down to the deeper structures.</p>
+                        <ol class="steps">
+                            <li class="step is-current" data-is-done="false">
+                                <span class="step__num">1</span>
+                                <span>Warm-up quiz</span>
+                                <span class="step__score" data-warmup-score>Not completed</span>
+                            </li>
+                            <li class="step" data-is-done="false">
+                                <span class="step__num">2</span>
+                                <span>Interactive game</span>
+                                <span class="step__score" data-game-xp hidden>+30 XP</span>
+                            </li>
+                            <li class="step" data-is-done="false">
+                                <span class="step__num">3</span>
+                                <span>Final quiz</span>
+                                <span class="step__score" data-final-score hidden></span>
+                            </li>
+                        </ol>
+                        <button class="module-card__button">Name</button>
+                    </div>
+                    <div class="module-card" data-module-content="coming-soon" data-module-id="x-ray-bones">
+                        <span class="module-card__completion" data-module-completion>0% complete</span>
+                        <span class="module-card_num">🦴</span>
+                        <h3>X-Ray Bones</h3>
+                        <p>Explore and identify bones on real X-ray images and learn what each one does.</p>
+                        <ol class="steps">
+                            <li class="step" data-is-done="false">
+                                <span class="step__num">1</span>
+                                <span>Warm-up quiz</span>
+                            </li>
+                            <li class="step" data-is-done="false">
+                                <span class="step__num">2</span>
+                                <span>Interactive game</span>
+                                <span class="step__score" data-game-xp hidden>+30 XP</span>
+                            </li>
+                            <li class="step" data-is-done="false">
+                                <span class="step__num">3</span>
+                                <span>Final quiz</span>
+                            </li>
+                        </ol>
+                        <button class="module-card__button">Name</button>
+                    </div>
+                    <div class="module-card" data-module-content="coming-soon" data-module-id="heart-blood-flow">
+                        <span class="module-card__completion" data-module-completion>0% complete</span>
+                        <span class="module-card_num">🫀</span>
+                        <h3>Blood Flow Through the Heart</h3>
+                        <p>Learn about the circulatory system and how blood flows through the heart such as chambers, valves, and vessels.</p>
+                        <ol class="steps">
+                            <li class="step" data-is-done="false">
+                                <span class="step__num">1</span>
+                                <span>Warm-up quiz</span>
+                            </li>
+                            <li class="step" data-is-done="false">
+                                <span class="step__num">2</span>
+                                <span>Interactive game</span>
+                                <span class="step__score" data-game-xp hidden>+30 XP</span>
+                            </li>
+                            <li class="step" data-is-done="false">
+                                <span class="step__num">3</span>
+                                <span>Final quiz</span>
+                            </li>
+                        </ol>
+                        <button class="module-card__button">Name</button>
+                    </div>
+                    <div class="module-card" data-module-id="airway-tracer">
+                        <span class="module-card__completion" data-module-completion>0% complete</span>
+                        <span class="module-card_num">4</span>
+                        <h3>Airway Tracer</h3>
+                        <p>Coming soon!</p>
+                        <ol class="steps">
+                            <li class="step" data-is-done="false"><span class="step__num">1</span><span>Warm-up quiz</span></li>
+                            <li class="step" data-is-done="false"><span class="step__num">2</span><span>Interactive game</span><span class="step__score" data-game-xp hidden>+30 XP</span></li>
+                            <li class="step" data-is-done="false"><span class="step__num">3</span><span>Final quiz</span></li>
+                        </ol>
+                    </div>
+                    <div class="module-card" data-module-id="brain-nervous-system">
+                        <span class="module-card__completion" data-module-completion>0% complete</span>
+                        <span class="module-card_num">5</span>
+                        <h3>Brain & Nervous System</h3>
+                        <p>Coming soon!</p>
+                        <ol class="steps">
+                            <li class="step" data-is-done="false"><span class="step__num">1</span><span>Warm-up quiz</span></li>
+                            <li class="step" data-is-done="false"><span class="step__num">2</span><span>Interactive game</span><span class="step__score" data-game-xp hidden>+30 XP</span></li>
+                            <li class="step" data-is-done="false"><span class="step__num">3</span><span>Final quiz</span></li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+ 
+        <section class="section" id="how">
+            <div class="container">
+                <h2 class="section__title">How each module works</h2>
+                <div class="how-grid">
+                    <div class="how-card">
+                        <span class="how-card__num">1</span>
+                        <h3>Warm-up quiz</h3>
+                        <p>See what you already know. Most people miss a lot of these, and that's the point. Guessing is completely fine.</p>
+                    </div>
+                    <div class="how-card">
+                        <span class="how-card__num">2</span>
+                        <h3>Interactive game</h3>
+                        <p>Learn by doing: trace, identify and explore real anatomy with instant feedback.</p>
+                    </div>
+                    <div class="how-card">
+                        <span class="how-card__num">3</span>
+                        <h3>Final quiz</h3>
+                        <p>Answer similar questions again and compare your before and after scores.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <footer class="page-footer">
+            <button class="reset-progress-button" id="resetProgressButton" type="button">
+                Reset all progress and XP
+            </button>
+        </footer>
+    <script src="script.js"></script>
+</body>
+</html>

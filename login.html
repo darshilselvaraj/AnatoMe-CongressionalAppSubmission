@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in | AnatoMe</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dosis:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            display: grid;
+            min-height: 100vh;
+            margin: 0;
+            padding: 1.5rem;
+            place-items: center;
+            background: linear-gradient(135deg, #6d28d9, #a855f7 55%, #c084fc);
+            color: #252033;
+            font-family: "Dosis", Arial, sans-serif;
+        }
+
+        .auth-card {
+            width: min(100%, 420px);
+            padding: 2.5rem;
+            border-radius: 24px;
+            background: #fff;
+            box-shadow: 0 20px 60px rgba(36, 10, 74, 0.25);
+        }
+
+        .brand {
+            display: block;
+            width: min(100%, 340px);
+            height: auto;
+            max-height: 72px;
+            margin: 0 auto 0.75rem;
+            object-fit: contain;
+            object-position: center;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            text-align: center;
+        }
+
+        .intro {
+            margin: 0.75rem 0 1.75rem;
+            color: #6b6675;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        .auth-form {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .auth-form[hidden] {
+            display: none;
+        }
+
+        label {
+            display: grid;
+            gap: 0.45rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            border: 1px solid #d9d4e2;
+            border-radius: 10px;
+            color: inherit;
+            font: inherit;
+        }
+
+        input:focus {
+            border-color: #7c3aed;
+            outline: 3px solid rgba(124, 58, 237, 0.18);
+        }
+
+        .submit-button {
+            margin-top: 0.35rem;
+            padding: 0.9rem 1rem;
+            border: 0;
+            border-radius: 10px;
+            background: #6d28d9;
+            color: #fff;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .submit-button:hover {
+            background: #5b21b6;
+        }
+
+        .switch-mode {
+            margin: 1.5rem 0 0;
+            color: #6b6675;
+            text-align: center;
+        }
+
+        .switch-mode button {
+            padding: 0;
+            border: 0;
+            background: none;
+            color: #6d28d9;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .switch-mode button:hover {
+            text-decoration: underline;
+        }
+
+        .form-message {
+            min-height: 1.25rem;
+            margin: 1rem 0 0;
+            color: #5b21b6;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            text-align: center;
+        }
+
+        .local-account-note {
+            margin: 0.75rem 0 0;
+            color: #777080;
+            font-size: 0.75rem;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        .back-link {
+            display: block;
+            margin-top: 1.25rem;
+            color: #6b6675;
+            font-size: 0.9rem;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            color: #6d28d9;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 480px) {
+            .auth-card {
+                padding: 2rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="auth-card">
+        <img class="brand" src="AnatoMe-logo.png" alt="AnatoMe">
+        <h1 id="formTitle">Create your account</h1>
+        <p class="intro" id="formIntro">Sign up to get started.</p>
+
+        <form class="auth-form" id="signupForm">
+            <label>
+                Name
+                <input type="text" name="name" autocomplete="name" required>
+            </label>
+            <label>
+                Email
+                <input type="email" name="email" autocomplete="email" required>
+            </label>
+            <label>
+                Password
+                <input type="password" name="password" autocomplete="new-password" minlength="8" required>
+            </label>
+            <button class="submit-button" type="submit">Create account</button>
+        </form>
+
+        <form class="auth-form" id="loginForm" hidden>
+            <label>
+                Email
+                <input type="email" name="email" autocomplete="email" required>
+            </label>
+            <label>
+                Password
+                <input type="password" name="password" autocomplete="current-password" required>
+            </label>
+            <button class="submit-button" type="submit">Log in</button>
+        </form>
+
+        <p class="switch-mode">
+            <span id="switchText">Already have an account?</span>
+            <button id="switchButton" type="button">Log in</button>
+        </p>
+        <p class="form-message" id="formMessage" aria-live="polite"></p>
+        <p class="local-account-note">
+            Demo account only: your account and progress are stored in this browser, not online.
+            Do not use a real password.
+        </p>
+        <a class="back-link" href="index.html">Back to dashboard</a>
+    </main>
+
+    <script>
+        const signupForm = document.getElementById('signupForm');
+        const loginForm = document.getElementById('loginForm');
+        const formTitle = document.getElementById('formTitle');
+        const formIntro = document.getElementById('formIntro');
+        const switchText = document.getElementById('switchText');
+        const switchButton = document.getElementById('switchButton');
+        const formMessage = document.getElementById('formMessage');
+        let isLogin = false;
+
+        function getAccountKey(email) {
+            return 'anatomeAccount.' + encodeURIComponent(email);
+        }
+
+        async function hashPassword(password, salt) {
+            const passwordBytes = new TextEncoder().encode(salt + password);
+            const passwordHash = await crypto.subtle.digest('SHA-256', passwordBytes);
+            return Array.from(new Uint8Array(passwordHash))
+                .map(function (byte) {
+                    return byte.toString(16).padStart(2, '0');
+                })
+                .join('');
+        }
+
+        switchButton.addEventListener('click', function () {
+            isLogin = !isLogin;
+            signupForm.hidden = isLogin;
+            loginForm.hidden = !isLogin;
+            formTitle.textContent = isLogin ? 'Welcome back' : 'Create your account';
+            formIntro.textContent = isLogin
+                ? 'Log in to continue.'
+                : 'Sign up to get started.';
+            switchText.textContent = isLogin
+                ? "Don't have an account?"
+                : 'Already have an account?';
+            switchButton.textContent = isLogin ? 'Sign up' : 'Log in';
+            formMessage.textContent = '';
+        });
+
+        signupForm.addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const name = signupForm.elements.name.value.trim();
+            const email = signupForm.elements.email.value.trim().toLowerCase();
+            const password = signupForm.elements.password.value;
+            const accountKey = getAccountKey(email);
+
+            if (localStorage.getItem(accountKey)) {
+                formMessage.textContent = 'An account with this email already exists. Log in instead.';
+                return;
+            }
+
+            try {
+                const salt = crypto.getRandomValues(new Uint8Array(16))
+                    .reduce(function (text, byte) {
+                        return text + byte.toString(16).padStart(2, '0');
+                    }, '');
+                const passwordHash = await hashPassword(password, salt);
+                localStorage.setItem(accountKey, JSON.stringify({
+                    name: name,
+                    email: email,
+                    salt: salt,
+                    passwordHash: passwordHash
+                }));
+                localStorage.setItem('anatomeCurrentAccount', email);
+                window.location.href = 'index.html';
+            } catch (error) {
+                formMessage.textContent = 'Could not create the local account in this browser.';
+            }
+        });
+
+        loginForm.addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const email = loginForm.elements.email.value.trim().toLowerCase();
+            const password = loginForm.elements.password.value;
+            const savedAccount = localStorage.getItem(getAccountKey(email));
+
+            if (!savedAccount) {
+                formMessage.textContent = 'No local account was found for that email.';
+                return;
+            }
+
+            try {
+                const account = JSON.parse(savedAccount);
+                const enteredPasswordHash = await hashPassword(password, account.salt);
+
+                if (enteredPasswordHash !== account.passwordHash) {
+                    formMessage.textContent = 'The email or password is incorrect.';
+                    return;
+                }
+
+                localStorage.setItem('anatomeCurrentAccount', account.email);
+                window.location.href = 'index.html';
+            } catch (error) {
+                formMessage.textContent = 'Could not log in to the local account in this browser.';
+            }
+        });
+    </script>
+</body>
+</html>

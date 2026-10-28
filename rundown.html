@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warm-up Quiz</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dosis:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --page-background: #24262c;
+            --panel-background: #30333b;
+            --button-background: #7667f5;
+            --button-hover: #6252df;
+            --main-text: #f1f3f8;
+            --muted-text: #b7bfce;
+            --panel-border: #454a57;
+            --cool-accent: #55e6d2;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
+            font-family: "Dosis", Arial, sans-serif;
+            color: var(--main-text);
+            background:
+                radial-gradient(ellipse at 50% 0, #353442 0, transparent 55%),
+                var(--page-background);
+        }
+
+        button {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1000;
+            padding: 0.75rem 1.25rem;
+            border: 1px solid transparent;
+            border-radius: 999px;
+            background-color: var(--button-background);
+            color: white;
+            font: inherit;
+            cursor: pointer;
+            transition: background-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+        }
+
+        button:hover {
+            background-color: var(--button-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 5px 18px rgba(118, 103, 245, 0.3);
+        }
+
+        button:focus-visible {
+            outline: 3px solid var(--cool-accent);
+            outline-offset: 3px;
+        }
+
+        #skipQuizButton {
+            top: 4.75rem;
+        }
+
+        .tracker-panel {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1000;
+            width: fit-content;
+            max-width: 100%;
+            margin: 0;
+            padding: 1rem;
+        }
+
+        #quiz-container {
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-sizing: border-box;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        #quiz-intro,
+        #quiz-question,
+        #quiz-results {
+            width: min(100%, 700px);
+            box-sizing: border-box;
+            padding: 2.5rem;
+            border: 1px solid var(--panel-border);
+            border-radius: 24px;
+            background: linear-gradient(145deg, #343741, var(--panel-background));
+            box-shadow: 0 18px 55px rgba(0, 0, 0, 0.35), 0 0 28px rgba(85, 230, 210, 0.06);
+            text-align: center;
+        }
+
+        h1,
+        h2 {
+            color: var(--cool-accent);
+        }
+
+        p {
+            color: var(--muted-text);
+        }
+
+        #question-text {
+            width: 100%;
+            margin: 0 auto 1rem;
+            line-height: 1.35;
+            overflow-wrap: anywhere;
+            text-wrap: balance;
+        }
+
+        #quiz-container p {
+            max-width: 600px;
+        }
+
+        #quiz-container button {
+            position: static;
+            margin-top: 0.75rem;
+        }
+
+        #quiz-container .answer-button {
+            width: min(100%, 600px);
+            border: 1px solid var(--panel-border);
+            background-color: #272a32;
+            color: var(--main-text);
+            text-align: left;
+        }
+
+        #quiz-container .answer-button:hover:not(:disabled) {
+            border-color: var(--panel-border);
+            background-color: #272a32;
+            transform: none;
+            box-shadow: none;
+        }
+
+        #quiz-container .answer-button:disabled {
+            cursor: default;
+        }
+
+        #quiz-container .correct-answer {
+            border-color: #40d99b;
+            background-color: #203c36;
+        }
+
+        #quiz-container .wrong-answer {
+            border-color: #ff7185;
+            background-color: #432d37;
+        }
+
+        #answer-options {
+            display: flex;
+            width: min(100%, 600px);
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #quiz-feedback {
+            max-width: 600px;
+            line-height: 1.5;
+        }
+
+        #game {
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-sizing: border-box;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        #game button {
+            position: static;
+            margin-top: 0.75rem;
+        }
+
+        .tissue-diagram {
+            display: block;
+            width: min(100%, 780px);
+            height: auto;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+
+        .flow {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .flow li {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--panel-border);
+            border-radius: 999px;
+            background-color: var(--panel-background);
+            color: var(--muted-text);
+        }
+
+        .flow .is-now {
+            border-color: var(--cool-accent);
+            background-color: #203b3d;
+            color: #b7fff4;
+            font-weight: bold;
+            box-shadow: 0 0 18px rgba(85, 230, 210, 0.16);
+        }
+
+        /* ----- Game ----- */
+        #game {
+            display: grid;
+            grid-template-columns: minmax(0, 780px) minmax(220px, 300px);
+            align-content: start;
+            align-items: start;
+            justify-content: center;
+            gap: 1.5rem;
+            width: min(100%, 1150px);
+            min-height: 100vh;
+            margin: 0 auto;
+            padding: 6rem 2rem 2rem;
+            text-align: left;
+        }
+
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            border: 1px solid var(--panel-border);
+            border-radius: 16px;
+            background-color: #20232a;
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.38), 0 0 24px rgba(85, 230, 210, 0.1);
+            cursor: crosshair;
+            touch-action: none; /* lets you cut on a phone without the page scrolling */
+        }
+
+        .game-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.75rem;
+            padding: 1rem;
+            border: 1px solid var(--panel-border);
+            border-radius: 16px;
+            background: linear-gradient(155deg, #343741, #292c33);
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+        }
+
+        .game-controls h2 {
+            margin: 0.25rem 0;
+            letter-spacing: 0.08em;
+        }
+
+        #toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        #toolbar button {
+            flex: 1 1 auto;
+        }
+
+        .game-controls button {
+            position: static;
+            margin: 0;
+        }
+
+        #toolbar button.selected {
+            background-color: var(--button-hover);
+            outline: 2px solid var(--cool-accent);
+            box-shadow: 0 0 18px rgba(85, 230, 210, 0.2);
+        }
+
+        #instructions,
+        #message {
+            min-height: 3em;
+            max-width: none;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        #message {
+            color: var(--cool-accent);
+        }
+
+        @media (max-width: 850px) {
+            #game {
+                grid-template-columns: minmax(0, 780px);
+            }
+
+            .game-controls {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .tracker-panel {
+                top: 0.5rem;
+                left: 0.5rem;
+                padding: 0.5rem;
+            }
+
+            #quiz-container {
+                padding: 6rem 1rem 2rem;
+            }
+
+            #quiz-intro,
+            #quiz-question {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button id="backButton">Back to dashboard</button>
+    <button id="skipQuizButton" hidden>Skip Quiz (Demo)</button>
+    <main>
+        <div class="tracker-panel">
+            <ol class="flow">
+                <li id="warmupTrackerStep" class="is-now">Warm-up quiz</li>
+                <li id="gameTrackerStep" class="is-next">Game</li>
+                <li id="finalTrackerStep" class="is-next">Final Quiz</li>
+                <li id="resultsTrackerStep" class="is-next">Results</li>
+            </ol>
+        </div>
+    </main>
+    <div id="quiz-container">
+        <div id="quiz-intro">
+            <h1>Warm-up Quiz</h1>
+            <h2 id="intro-subtitle">Let’s see what you already know</h2>
+            <p id="intro-copy">This is a warm-up. Guessing is completely fine. You’ll see answers and explanations after the final quiz.</p>
+            <button id="startQuizButton">Begin Quiz</button>
+        </div>
+
+        <section id="quiz-question" hidden>
+            <p id="question-progress"></p>
+            <h1 id="question-text"></h1>
+            <div id="answer-options"></div>
+            <p id="quiz-feedback" aria-live="polite"></p>
+            <button id="nextQuestionButton" hidden>Next Question</button>
+        </section>
+
+        <section id="quiz-results" hidden>
+            <h1 id="results-title">Quiz Complete!</h1>
+            <p id="final-score"></p>
+            <p id="final-xp"></p>
+            <div id="warmup-review" hidden></div>
+            <div id="final-review" hidden></div>
+            <p id="score-change" hidden></p>
+            <button id="startGameButton">Start Game</button>
+            <button id="backToModulesButton">Back to Modules</button>
+            <button id="tryAgainButton">Try Again</button>
+        </section>
+    </div>
+
+    <section id="game" hidden>
+        <canvas id="gameCanvas" width="1040" height="880"></canvas>
+
+        <div class="game-controls">
+            <h2>Tools</h2>
+            <div id="toolbar">
+                <button id="knifeButton">Knife</button>
+                <button id="magnifierButton">Magnifier</button>
+            </div>
+
+            <h2>Explanation</h2>
+            <p id="instructions"></p>
+            <p id="message"></p>
+            <button id="nextButton" hidden>Next</button>
+            <button id="toFinal" hidden>Finish the game</button>
+        </div>
+    </section>
+
+    <script>
+        const backButton = document.getElementById('backButton');
+        const startQuizButton = document.getElementById('startQuizButton');
+        const skipQuizButton = document.getElementById('skipQuizButton');
+        const startGameButton = document.getElementById('startGameButton');
+        const intro = document.getElementById('quiz-intro');
+        const introTitle = document.querySelector('#quiz-intro h1');
+        const introSubtitle = document.getElementById('intro-subtitle');
+        const introCopy = document.getElementById('intro-copy');
+        const quizContainer = document.getElementById('quiz-container');
+        const questionSection = document.getElementById('quiz-question');
+        const resultsSection = document.getElementById('quiz-results');
+        const gameSection = document.getElementById('game');
+        const warmupTrackerStep = document.getElementById('warmupTrackerStep');
+        const gameTrackerStep = document.getElementById('gameTrackerStep');
+        const finalTrackerStep = document.getElementById('finalTrackerStep');
+        const resultsTrackerStep = document.getElementById('resultsTrackerStep');
+        const questionProgress = document.getElementById('question-progress');
+        const questionText = document.getElementById('question-text');
+        const answerOptions = document.getElementById('answer-options');
+        const quizFeedback = document.getElementById('quiz-feedback');
+        const nextQuestionButton = document.getElementById('nextQuestionButton');
+        const finalScore = document.getElementById('final-score');
+        const finalXp = document.getElementById('final-xp');
+        const warmupReview = document.getElementById('warmup-review');
+        const finalReview = document.getElementById('final-review');
+        const scoreChange = document.getElementById('score-change');
+        const resultsTitle = document.getElementById('results-title');
+        const tryAgainButton = document.getElementById('tryAgainButton');
+        const backToModulesButton = document.getElementById('backToModulesButton');
+        const toFinalButton = document.getElementById('toFinal');
+        const pageParameters = new URLSearchParams(window.location.search);
+        const moduleId = pageParameters.get('module') || 'tissue-layers';
+        const requestedStep = pageParameters.get('step');
+        const accountEmail = localStorage.getItem('anatomeCurrentAccount');
+        if (!accountEmail) {
+            window.location.replace('login.html');
+        }
+
+        const accountStoragePrefix = 'anatomeAccountData.'
+            + encodeURIComponent(accountEmail || '') + '.';
+        const progressKey = accountStoragePrefix + 'moduleProgress.' + moduleId;
+        const bestWarmupScoreKey = progressKey + '.warmupBestScore';
+        const bestWarmupQuestionCountKey = progressKey + '.warmupQuestionCount';
+        const warmupScoreKey = progressKey + '.warmupScore';
+        const warmupAnswersKey = progressKey + '.warmupAnswers';
+        const finalScoreKey = progressKey + '.finalScore';
+        const finalQuestionCountKey = progressKey + '.finalQuestionCount';
+        const gameXpKey = progressKey + '.gameXp';
+        const gameXpAwardedKey = progressKey + '.gameXpAwarded';
+
+        if (requestedStep === 'game') {
+            quizContainer.hidden = true;
+            gameSection.hidden = false;
+            warmupTrackerStep.classList.remove('is-now');
+            warmupTrackerStep.classList.add('is-next');
+            gameTrackerStep.classList.remove('is-next');
+            gameTrackerStep.classList.add('is-now');
+        }
+
+        let quizKind = 'warmup';
+        const questions = [
+            {
+                question: 'Which layer of skin is on the outside?',
+                options: ['Dermis', 'Hypodermis', 'Epidermis', 'Periosteum'],
+                correctAnswer: 2,
+                topic: 'Skin layers',
+                explanation: 'The epidermis is the outermost layer. Its cells form at the bottom, move up, and are shed from the surface.'
+            },
+            {
+                question: 'Which skin layer contains blood vessels, nerves and sweat glands?',
+                options: ['Epidermis', 'Dermis', 'The dead surface cells', 'None of them'],
+                correctAnswer: 1,
+                topic: 'Skin layers',
+                explanation: 'The dermis is thick connective tissue full of collagen, blood vessels, nerves, sweat glands and hair follicles.'
+            },
+            {
+                question: 'Does the epidermis have its own blood vessels?',
+                options: [
+                    'Yes, lots of them',
+                    'Only in the fingertips',
+                    'No, it gets nutrients from the dermis below',
+                    'Only when you’re injured'
+                ],
+                correctAnswer: 2,
+                topic: 'Skin layers',
+                explanation: 'The epidermis has no blood vessels. Capillaries in the dermis feed it by diffusion, which is why a very shallow scrape doesn’t bleed.'
+            },
+            {
+                question: 'What is the hypodermis (the layer under the skin) mostly made of?',
+                options: ['Muscle fibers', 'Fat (adipose tissue)', 'Cartilage', 'Nerve cells'],
+                correctAnswer: 1,
+                topic: 'Skin layers',
+                explanation: 'It stores energy, insulates and cushions what’s underneath.'
+            },
+            {
+                question: 'Which layer sits directly beneath the dermis?',
+                options: ['Epidermis', 'Bone', 'Hypodermis', 'Muscle'],
+                correctAnswer: 2,
+                topic: 'Skin layers',
+                explanation: 'From the outside in: epidermis → dermis → hypodermis → muscle → bone.'
+            },
+            {
+                question: 'How many basic types of tissue make up the human body?',
+                options: ['2', '4', '6', '10'],
+                correctAnswer: 1,
+                topic: 'Tissue types',
+                explanation: 'The four types are epithelial, connective, muscle and nervous tissue.'
+            },
+            {
+                question: 'What is the main job of sweat?',
+                options: ['Kill bacteria', 'Cool the body', 'Keep skin waterproof', 'Make vitamin D'],
+                correctAnswer: 1,
+                topic: 'Skin structures',
+                explanation: 'Sweat glands deep in the dermis send sweat up a duct to a pore, and evaporation cools you down.'
+            },
+            {
+                question: 'What covers the outside of a bone?',
+                options: [
+                    'Cartilage',
+                    'A thin membrane called the periosteum',
+                    'A layer of fat',
+                    'Nothing'
+                ],
+                correctAnswer: 1,
+                topic: 'Bone structure',
+                explanation: 'The periosteum carries blood vessels and nerves, and it helps bones grow and heal.'
+            }
+        ];
+
+        const finalQuestions = [
+            {
+                question: 'You run your hand along your arm. Which layer of skin are you actually touching?',
+                options: ['The dermis', 'The epidermis', 'The hypodermis', 'The muscle'],
+                correctAnswer: 1,
+                explanation: 'The epidermis is the outside layer, so it’s the only one you ever touch. It was the first layer you cut through in the game.'
+            },
+            {
+                question: 'A hair follicle, a sweat gland and tiny nerve endings all live in the same layer. Which one?',
+                options: ['Dermis', 'Epidermis', 'Hypodermis', 'Bone'],
+                correctAnswer: 0,
+                explanation: 'The dermis is the busy layer. It holds hair follicles, sweat glands, nerves and blood vessels, which is why you found the sweat gland there with the magnifier.'
+            },
+            {
+                question: 'You lightly scrape your knee. It stings a little, but it doesn’t bleed. What’s the most likely reason?',
+                options: [
+                    'Your skin heals too fast to bleed',
+                    'Knees don’t have blood vessels',
+                    'The scrape only went through the epidermis, which has no blood vessels',
+                    'The dermis stops blood from getting out'
+                ],
+                correctAnswer: 2,
+                explanation: 'The epidermis has no blood vessels of its own. The capillary loops you found stop right below it, so a scrape has to reach the dermis before it bleeds.'
+            },
+            {
+                question: 'Which layer keeps you warm and acts like a cushion when you bump into something?',
+                options: ['Epidermis', 'Dermis', 'Muscle', 'Hypodermis'],
+                correctAnswer: 3,
+                explanation: 'The hypodermis is mostly fat. Fat holds in heat, stores energy and softens hits, like padding under your skin.'
+            },
+            {
+                question: 'Starting at the surface and going inward, which order is right?',
+                options: [
+                    'Dermis → epidermis → hypodermis → muscle',
+                    'Epidermis → dermis → hypodermis → muscle',
+                    'Epidermis → hypodermis → dermis → muscle',
+                    'Hypodermis → dermis → epidermis → muscle'
+                ],
+                correctAnswer: 1,
+                explanation: 'This is the same order your knife went: epidermis, dermis, hypodermis, then muscle, with bone at the very bottom.'
+            },
+            {
+                question: 'Bone, blood and fat are all examples of which basic type of tissue?',
+                options: ['Epithelial', 'Nervous', 'Connective', 'Muscle'],
+                correctAnswer: 2,
+                explanation: 'They look nothing alike, but they’re all connective tissue. Connective tissue supports, connects or carries things around the body.'
+            },
+            {
+                question: 'Why do you feel cooler after you sweat?',
+                options: [
+                    'The sweat evaporates and carries heat away from your skin',
+                    'Sweat is colder than your body',
+                    'Sweating slows down your heart',
+                    'Sweat blocks heat from getting into your skin'
+                ],
+                correctAnswer: 0,
+                explanation: 'Sweat comes out warm. The cooling happens when it evaporates, because turning into vapor takes heat with it, and that heat comes from your skin.'
+            },
+            {
+                question: 'On your last cut, you reached the bone. What’s the thin layer wrapped around the outside of a bone called?',
+                options: ['Cartilage', 'Periosteum', 'Epidermis', 'Hypodermis'],
+                correctAnswer: 1,
+                explanation: 'The periosteum is a thin membrane covering the bone. It has its own blood vessels and nerves, and it helps bones grow and heal after a break.'
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let topicScoresThisQuiz = {};
+        let pickedAnswers = [];
+
+        if (requestedStep === 'final') {
+            quizKind = 'final';
+            document.title = 'Final Quiz | AnatoMe';
+            introTitle.textContent = 'Final Quiz';
+            introSubtitle.textContent = 'Let’s see what you learned in the game';
+            introCopy.textContent = 'Answer every question. You’ll see both quiz results and explanations at the end.';
+            startQuizButton.textContent = 'Start Final Quiz';
+            warmupTrackerStep.classList.remove('is-now');
+            warmupTrackerStep.classList.add('is-next');
+            gameTrackerStep.classList.remove('is-now');
+            gameTrackerStep.classList.add('is-next');
+            finalTrackerStep.classList.remove('is-next');
+            finalTrackerStep.classList.add('is-now');
+        }
+
+        backButton.addEventListener('click', function () {
+            window.location.href = 'index.html';
+        });
+
+        startQuizButton.addEventListener('click', function () {
+            intro.hidden = true;
+            questionSection.hidden = false;
+            skipQuizButton.hidden = false;
+            currentQuestion = 0;
+            score = 0;
+            pickedAnswers = [];
+            topicScoresThisQuiz = {};
+            showQuestion();
+        });
+
+        function showQuestion() {
+            const quizQuestions = quizKind === 'warmup' ? questions : finalQuestions;
+            const question = quizQuestions[currentQuestion];
+
+            questionProgress.textContent = 'Question ' + (currentQuestion + 1) + ' of ' + quizQuestions.length;
+            questionText.textContent = question.question;
+            quizFeedback.textContent = '';
+            answerOptions.innerHTML = '';
+            nextQuestionButton.hidden = true;
+
+            for (let i = 0; i < question.options.length; i++) {
+                const answerButton = document.createElement('button');
+                answerButton.className = 'answer-button';
+                answerButton.textContent = String.fromCharCode(65 + i) + ') ' + question.options[i];
+
+                answerButton.addEventListener('click', function () {
+                    checkAnswer(i);
+                });
+
+                answerOptions.appendChild(answerButton);
+            }
+        }
+
+        function checkAnswer(selectedAnswer) {
+            const quizQuestions = quizKind === 'warmup' ? questions : finalQuestions;
+            const question = quizQuestions[currentQuestion];
+            const answerButtons = answerOptions.querySelectorAll('button');
+            const isCorrect = selectedAnswer === question.correctAnswer;
+            pickedAnswers.push(selectedAnswer);
+
+            if (quizKind === 'warmup') {
+                let topicScore = topicScoresThisQuiz[question.topic];
+                if (!topicScore) {
+                    topicScore = { correct: 0, total: 0 };
+                    topicScoresThisQuiz[question.topic] = topicScore;
+                }
+                topicScore.total++;
+                if (isCorrect) {
+                    topicScore.correct++;
+                }
+            }
+
+            if (isCorrect) {
+                score++;
+            }
+            quizFeedback.textContent = 'Answer saved. Explanations are in your results.';
+
+            for (let i = 0; i < answerButtons.length; i++) {
+                answerButtons[i].disabled = true;
+            }
+
+            nextQuestionButton.textContent = currentQuestion === quizQuestions.length - 1
+                ? (quizKind === 'final' ? 'See Results' : 'Finish Quiz')
+                : 'Next Question';
+            nextQuestionButton.hidden = false;
+        }
+
+        nextQuestionButton.addEventListener('click', function () {
+            currentQuestion++;
+            const quizQuestions = quizKind === 'warmup' ? questions : finalQuestions;
+
+            if (currentQuestion < quizQuestions.length) {
+                showQuestion();
+            } else {
+                showResults();
+            }
+        });
+
+        skipQuizButton.addEventListener('click', function () {
+            const quizQuestions = quizKind === 'warmup' ? questions : finalQuestions;
+            while (pickedAnswers.length < quizQuestions.length) {
+                pickedAnswers.push(-1);
+            }
+            score = 0;
+            showResults();
+        });
+
+        function showResults() {
+            questionSection.hidden = true;
+            resultsSection.hidden = false;
+            skipQuizButton.hidden = true;
+            if (quizKind === 'warmup') {
+                localStorage.setItem(progressKey + '.0', 'true');
+                const oldBest = Number(localStorage.getItem(bestWarmupScoreKey)) || 0;
+                localStorage.setItem(bestWarmupScoreKey, String(Math.max(oldBest, score)));
+                localStorage.setItem(bestWarmupQuestionCountKey, String(questions.length));
+                localStorage.setItem(warmupScoreKey, String(score));
+                localStorage.setItem(warmupAnswersKey, JSON.stringify(pickedAnswers));
+                const topicScoreKey = progressKey + '.topicScores';
+                const savedTopicScores = JSON.parse(localStorage.getItem(topicScoreKey) || '{}');
+
+                for (const topicName in topicScoresThisQuiz) {
+                    if (!savedTopicScores[topicName]) {
+                        savedTopicScores[topicName] = { correct: 0, total: 0 };
+                    }
+                    savedTopicScores[topicName].correct += topicScoresThisQuiz[topicName].correct;
+                    savedTopicScores[topicName].total += topicScoresThisQuiz[topicName].total;
+                }
+                localStorage.setItem(topicScoreKey, JSON.stringify(savedTopicScores));
+                finalScore.textContent = 'You got ' + score + ' out of ' + questions.length + ' correct.';
+                finalXp.textContent = 'Warm-up XP: ' + score + ' XP (1 XP per correct answer).';
+                warmupReview.hidden = true;
+                finalReview.hidden = true;
+                scoreChange.hidden = true;
+                resultsTitle.textContent = 'Warm-up Quiz Complete!';
+                startGameButton.hidden = false;
+                tryAgainButton.hidden = false;
+                finalTrackerStep.classList.remove('is-now');
+            } else {
+                localStorage.setItem(progressKey + '.2', 'true');
+                localStorage.setItem(finalScoreKey, String(score));
+                localStorage.setItem(finalQuestionCountKey, String(finalQuestions.length));
+                finalScore.textContent = '';
+                finalXp.textContent = '';
+                resultsTitle.textContent = 'Quiz Results';
+                document.title = 'Quiz Results | AnatoMe';
+                startGameButton.hidden = true;
+                tryAgainButton.hidden = true;
+                warmupReview.hidden = false;
+                finalReview.hidden = false;
+                scoreChange.hidden = false;
+                finalTrackerStep.classList.remove('is-now');
+                finalTrackerStep.classList.add('is-next');
+                resultsTrackerStep.classList.remove('is-next');
+                resultsTrackerStep.classList.add('is-now');
+
+                const warmupScore = Number(localStorage.getItem(warmupScoreKey)) || 0;
+                const warmupAnswers = JSON.parse(localStorage.getItem(warmupAnswersKey) || '[]');
+                warmupReview.innerHTML = '';
+                finalReview.innerHTML = '';
+                addReview(warmupReview, 'Warm-up Quiz', questions, warmupAnswers, warmupScore);
+                addReview(finalReview, 'Final Quiz', finalQuestions, pickedAnswers, score);
+
+                const difference = score - warmupScore;
+                if (difference > 0) {
+                    scoreChange.textContent = 'You scored ' + difference
+                        + ' points higher than your warm-up quiz. That’s an improvement!';
+                } else if (difference < 0) {
+                    scoreChange.textContent = 'You scored less than your warm-up quiz, but that’s okay! '
+                        + 'You are still improving. Try replaying the module.';
+                } else {
+                    scoreChange.textContent = 'You scored the same as your warm-up quiz. That’s okay! '
+                        + 'You are still improving. Try replaying the module.';
+                }
+            }
+        }
+
+        function addReview(container, title, quizQuestions, answers, resultScore) {
+            const heading = document.createElement('h2');
+            heading.textContent = title + ': ' + resultScore + ' out of ' + quizQuestions.length + ' correct';
+            container.appendChild(heading);
+
+            for (let i = 0; i < quizQuestions.length; i++) {
+                const question = quizQuestions[i];
+                const questionTitle = document.createElement('h3');
+                const yourAnswer = document.createElement('p');
+                const correctAnswer = document.createElement('p');
+                const explanation = document.createElement('p');
+
+                questionTitle.textContent = (i + 1) + '. ' + question.question;
+                yourAnswer.textContent = 'Your answer: '
+                    + (answers[i] >= 0 ? question.options[answers[i]] : 'No answer');
+                correctAnswer.textContent = 'Correct answer: ' + question.options[question.correctAnswer];
+                explanation.textContent = question.explanation;
+                container.appendChild(questionTitle);
+                container.appendChild(yourAnswer);
+                container.appendChild(correctAnswer);
+                container.appendChild(explanation);
+            }
+        }
+
+        startGameButton.addEventListener('click', function () {
+            // Save the warm-up, then show the interactive game.
+            localStorage.setItem(progressKey + '.0', 'true');
+            quizContainer.hidden = true;
+            gameSection.hidden = false;
+            warmupTrackerStep.classList.remove('is-now');
+            warmupTrackerStep.classList.add('is-next');
+            gameTrackerStep.classList.remove('is-next');
+            gameTrackerStep.classList.add('is-now');
+            startGame();
+        });
+
+        backToModulesButton.addEventListener('click', function () {
+            localStorage.setItem(progressKey + '.0', 'true');
+            window.location.href = 'index.html';
+        });
+
+        toFinalButton.addEventListener('click', function () {
+            // award game XP only when the learner confirms that the game is finished.
+            if (localStorage.getItem(gameXpAwardedKey) !== 'true') {
+                const existingGameXp = Number(localStorage.getItem(gameXpKey)) || 0;
+
+                if (existingGameXp === 0) {
+                    localStorage.setItem(gameXpKey, '30');
+                }
+
+                localStorage.setItem(gameXpAwardedKey, 'true');
+            }
+
+            // Step 1 is the interactive game.
+            localStorage.setItem(progressKey + '.1', 'true');
+            quizKind = 'final';
+            document.title = 'Final Quiz | AnatoMe';
+            gameSection.hidden = true;
+            quizContainer.hidden = false;
+            intro.hidden = false;
+            questionSection.hidden = true;
+            resultsSection.hidden = true;
+            introTitle.textContent = 'Final Quiz';
+            introSubtitle.textContent = 'Let’s see what you learned in the game';
+            introCopy.textContent = 'Answer every question. You’ll see both quiz results and explanations at the end.';
+            startQuizButton.textContent = 'Start Final Quiz';
+            warmupTrackerStep.classList.remove('is-now');
+            warmupTrackerStep.classList.add('is-next');
+            gameTrackerStep.classList.remove('is-now');
+            gameTrackerStep.classList.add('is-next');
+            finalTrackerStep.classList.remove('is-next');
+            finalTrackerStep.classList.add('is-now');
+        });
+
+        tryAgainButton.addEventListener('click', function () {
+            currentQuestion = 0;
+            score = 0;
+            pickedAnswers = [];
+            quizKind = 'warmup';
+            document.title = 'Warm-up Quiz';
+            resultsSection.hidden = true;
+            gameSection.hidden = true;
+            quizContainer.hidden = false;
+            intro.hidden = false;
+            skipQuizButton.hidden = true;
+            introTitle.textContent = 'Warm-up Quiz';
+            introSubtitle.textContent = 'Let’s see what you already know';
+            introCopy.textContent = 'This is a warm-up. Guessing is completely fine. You’ll see answers and explanations after the final quiz.';
+            startQuizButton.textContent = 'Begin Quiz';
+            startGameButton.hidden = false;
+            tryAgainButton.hidden = false;
+            warmupReview.hidden = true;
+            finalReview.hidden = true;
+            scoreChange.hidden = true;
+            warmupTrackerStep.classList.remove('is-next');
+            warmupTrackerStep.classList.add('is-now');
+            gameTrackerStep.classList.remove('is-now');
+            gameTrackerStep.classList.add('is-next');
+            finalTrackerStep.classList.remove('is-now');
+            finalTrackerStep.classList.add('is-next');
+            resultsTrackerStep.classList.remove('is-now');
+            resultsTrackerStep.classList.add('is-next');
+        });
+
+        // GAME -------------------
+
+        const gameCanvas = document.getElementById('gameCanvas');
+        const ctx = gameCanvas.getContext('2d');
+        const knifeButton = document.getElementById('knifeButton');
+        const magnifierButton = document.getElementById('magnifierButton');
+        const toolbar = document.getElementById('toolbar');
+        const instructions = document.getElementById('instructions');
+        const message = document.getElementById('message');
+        const nextButton = document.getElementById('nextButton');
+
+        // Load each picture in the order the game reveals it.
+        const skinPictures = [];
+        const skinPictureFiles = [
+            'skin-details.png',
+            'skin-4.png',
+            'skin-2.png',
+            'skin-3.png',
+            'skin-1.png',
+            'skin-0.png'
+        ];
+
+        for (let i = 0; i < skinPictureFiles.length; i++) {
+            const picture = new Image();
+            picture.src = 'images/' + skinPictureFiles[i];
+            picture.onload = drawGame; // draw again once the picture has loaded
+            skinPictures.push(picture);
+        }
+
+        const matchingPicture = new Image();
+        matchingPicture.src = 'svgs/tissue-labeled.svg#match-view';
+        matchingPicture.onload = drawGame;
+
+        // The same drawing, but with the tiny details showing. Only the magnifier uses it.
+        const detailsPicture = skinPictures[skinPictures.length - 1];
+
+        // All positions are [x, y] in canvas pixels. The canvas is 1040 wide and 880 tall.
+        const tasks = [
+            {
+                tool: 'knife',
+                instructions: 'Cut 1: Pick the knife. Press down on the green dot and drag along the dotted line to the yellow circle.',
+                cutLine: [[500, 92], [524, 116], [504, 148], [490, 176], [504, 208]],
+                allowedDistance: 28,
+                newPicture: 1,
+                lesson: 'Epidermis! The outer layer of skin. Its cells are always being shed and replaced, and it has no blood vessels.'
+            },
+            {
+                tool: 'knife',
+                instructions: 'Cut 2: Keep going deeper. The band is a bit narrower now.',
+                cutLine: [[504, 208], [532, 252], [516, 300], [482, 344], [492, 384], [512, 420]],
+                allowedDistance: 24,
+                newPicture: 2,
+                lesson: 'Ooh! A Dermis! It has blood vessels, nerves, sweat glands and hair follicles. A cut that bleeds has reached the dermis.'
+            },
+            {
+                tool: 'knife',
+                instructions: 'Cut 3: Cut through the next layer.',
+                cutLine: [[512, 420], [476, 460], [488, 508], [532, 544], [524, 580], [504, 612]],
+                allowedDistance: 22,
+                newPicture: 3,
+                lesson: 'Wow! Hypodermis! Mostly fat. It stores energy, keeps you warm and cushions what is underneath.'
+            },
+            {
+                tool: 'knife',
+                instructions: 'Cut 4: Last cut, down to the muscle. Go slowly!',
+                cutLine: [[504, 612], [540, 644], [524, 684], [480, 714], [496, 744], [512, 772]],
+                allowedDistance: 20,
+                newPicture: 4,
+                lesson: 'Skeletal muscle, and under it, bone. Bone is wrapped in a thin membrane called the periosteum.'
+            },
+            {
+                tool: 'magnifier',
+                instructions: 'Pick the magnifier and look around the dermis. Click the sweat gland (a coiled tube).',
+                targets: [[248, 356]],
+                hint: 'Not there. Sweat glands are deep in the dermis, near the fat layer.',
+                lesson: 'Sweat gland! It makes sweat, which travels up a tube to a pore. When sweat evaporates, it cools you down. Imagine what would happen if we never had these!'
+            },
+            {
+                tool: 'magnifier',
+                instructions: 'Now find a capillary loop: a tiny blood vessel that goes up toward the epidermis and turns back down.',
+                targets: [[364, 280], [676, 280], [988, 280]],
+                hint: 'Oops, that is not a capillary. Look for thin red loops going up from the big blood vessels.',
+                lesson: 'Capillary loop! Capillaries stop right below the epidermis. That is why a very shallow scrape might not bleed.'
+            }
+        ];
+
+        let taskNumber = 0;
+        let pictureNumber = 0;
+        let tool = 'none';
+        let taskDone = false;
+        let matchingGameActive = false;
+
+        const PIECE_WIDTH = 150;
+        const PIECE_HEIGHT = 80;
+        const skinLayers = [
+            { name: 'Epidermis', top: 120, bottom: 208 },
+            { name: 'Dermis', top: 208, bottom: 410 },
+            { name: 'Hypodermis', top: 410, bottom: 620 },
+            { name: 'Skeletal muscle', top: 620, bottom: 774 }
+        ];
+        const puzzlePieces = [
+            {
+                words: ['Epidermis', 'outer layer'],
+                belongsIn: 'Epidermis',
+                fact: 'The epidermis is the skin’s outer protective layer.',
+                wrongLayerHint: 'The epidermis is the outermost skin layer.',
+                homeSpot: [825, 124]
+            },
+            {
+                words: ['Dermis', 'vessels + nerves'],
+                belongsIn: 'Dermis',
+                fact: 'The dermis contains blood vessels, nerves, glands, and follicles.',
+                wrongLayerHint: 'The dermis sits below the epidermis.',
+                homeSpot: [825, 270]
+            },
+            {
+                words: ['Hypodermis', 'fat + cushion'],
+                belongsIn: 'Hypodermis',
+                fact: 'The hypodermis stores energy, insulates, and cushions.',
+                wrongLayerHint: 'The hypodermis sits below the dermis.',
+                homeSpot: [825, 470]
+            },
+            {
+                words: ['Skeletal muscle', 'movement'],
+                belongsIn: 'Skeletal muscle',
+                fact: 'Skeletal muscle contracts to move the body.',
+                wrongLayerHint: 'Skeletal muscle lies below the hypodermis.',
+                homeSpot: [825, 648]
+            }
+        ];
+        let piecesMatched = 0;
+        let pieceBeingDragged = null;
+        let grabOffsetX = 0;
+        let grabOffsetY = 0;
+
+        let mouseX = 0;
+        let mouseY = 0;
+        let mouseIsOnCanvas = false;
+
+        // Knife
+        let isCutting = false;
+        let guideDots = [];
+        let furthestDot = 0;
+        let cutLine = [];
+        let oldCuts = [];
+
+        function startGame() {
+            taskNumber = 0;
+            pictureNumber = 0;
+            oldCuts = [];
+            matchingGameActive = false;
+            toolbar.hidden = false;
+            toFinalButton.hidden = true;
+            showTask();
+        }
+
+        function showTask() {
+            const task = tasks[taskNumber];
+            instructions.textContent = task.instructions;
+            message.textContent = '';
+            nextButton.hidden = true;
+            taskDone = false;
+            isCutting = false;
+            cutLine = [];
+
+            if (task.tool === 'knife') {
+                guideDots = makeGuideDots(task.cutLine);
+            }
+
+            drawGame();
+        }
+
+        // ----- Tools -----
+
+        knifeButton.addEventListener('click', function () {
+            tool = 'knife';
+            knifeButton.classList.add('selected');
+            magnifierButton.classList.remove('selected');
+            drawGame();
+        });
+
+        magnifierButton.addEventListener('click', function () {
+            tool = 'magnifier';
+            magnifierButton.classList.add('selected');
+            knifeButton.classList.remove('selected');
+            drawGame();
+        });
+
+        // --- Helper functions
+
+        // shows where the mouse is on the canvas.
+        // the canvas is shrunk so it fits the screen and we can scale the mouse position back up
+        function getMousePosition(event) {
+            const scale = gameCanvas.width / gameCanvas.clientWidth;
+            return [event.offsetX * scale, event.offsetY * scale];
+        }
+
+        function getDistance(pointA, pointB) {
+            const xDiff = pointA[0] - pointB[0];
+            const yDiff = pointA[1] - pointB[1];
+            return Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+        }
+
+        // turns a few corner points into lots of small dots along the line
+        function makeGuideDots(corners) {
+            const dots = [];
+
+            for (let i = 0; i < corners.length - 1; i++) {
+                const start = corners[i];
+                const end = corners[i + 1];
+
+                for (let step = 0; step < 20; step++) {
+                    const frac = step / 20;
+                    const x = start[0] + (end[0] - start[0]) * frac;
+                    const y = start[1] + (end[1] - start[1]) * frac;
+                    dots.push([x, y]);
+                }
+            }
+
+            dots.push(corners[corners.length - 1]);
+            return dots;
+        }
+
+        // ----- Mouse -----
+
+        gameCanvas.addEventListener('pointerdown', function (event) {
+            if (matchingGameActive) {
+                pickUpPiece(getMousePosition(event));
+                if (pieceBeingDragged) {
+                    gameCanvas.setPointerCapture(event.pointerId);
+                }
+                drawGame();
+                return;
+            }
+
+            if (taskDone) {
+                return;
+            }
+
+            const task = tasks[taskNumber];
+            const mouse = getMousePosition(event);
+
+            if (task.tool === 'knife') {
+                startCut(mouse, task);
+            } else {
+                checkMagnifierClick(mouse, task);
+            }
+        });
+
+        gameCanvas.addEventListener('pointermove', function (event) {
+            const mouse = getMousePosition(event);
+            mouseX = mouse[0];
+            mouseY = mouse[1];
+            mouseIsOnCanvas = true;
+
+            if (matchingGameActive && pieceBeingDragged) {
+                pieceBeingDragged.x = mouse[0] - grabOffsetX;
+                pieceBeingDragged.y = mouse[1] - grabOffsetY;
+            } else if (isCutting) {
+                keepCutting(mouse);
+            }
+
+            drawGame();
+        });
+
+        gameCanvas.addEventListener('pointerup', function () {
+            if (matchingGameActive && pieceBeingDragged) {
+                const piece = pieceBeingDragged;
+                pieceBeingDragged = null;
+                dropPiece(piece);
+                drawGame();
+                return;
+            }
+
+            if (isCutting) {
+                isCutting = false;
+                cutLine = [];
+                message.textContent = 'You let go of the knife. Start again from the green dot.';
+                drawGame();
+            }
+        });
+
+        gameCanvas.addEventListener('pointerleave', function () {
+            mouseIsOnCanvas = false;
+            if (isCutting) {
+                slip();
+            }
+            drawGame();
+        });
+
+        // ----- Knife -----
+
+        function startCut(mouse, task) {
+            if (tool !== 'knife') {
+                message.textContent = 'Pick the knife first.';
+                return;
+            }
+
+            if (getDistance(mouse, guideDots[0]) > task.allowedDistance) {
+                message.textContent = 'Start your cut on the green dot.';
+                return;
+            }
+
+            isCutting = true;
+            furthestDot = 0;
+            cutLine = [mouse];
+            message.textContent = 'Steady...';
+        }
+
+        function keepCutting(mouse) {
+            const task = tasks[taskNumber];
+            cutLine.push(mouse);
+
+            // get the dot on the guide line that is closest to the mouse
+            let closestDot = 0;
+            let closestDistance = 100000;
+            for (let i = 0; i < guideDots.length; i++) {
+                const distance = getDistance(mouse, guideDots[i]);
+                if (distance < closestDistance) {
+                    closestDistance = distance;
+                    closestDot = i;
+                }
+            }
+
+            // if too far from the line, then that is a slip.
+            if (closestDistance > task.allowedDistance) {
+                slip();
+                return;
+            }
+
+            if (closestDot > furthestDot) {
+                furthestDot = closestDot;
+            }
+
+            // if it reached the last dot, then cut is done.
+            if (furthestDot === guideDots.length - 1) {
+                finishCut();
+            }
+        }
+
+        function slip() {
+            isCutting = false;
+            cutLine = [];
+            message.textContent = 'You slipped! In surgery, a slip like that could cut a nerve or blood vessel. Start again from the green dot.';
+        }
+
+        function finishCut() {
+            const task = tasks[taskNumber];
+            isCutting = false;
+            oldCuts.push(cutLine);
+            cutLine = [];
+            pictureNumber = task.newPicture;
+            finishTask(task.lesson);
+        }
+
+        // Magnifier
+
+        function checkMagnifierClick(mouse, task) {
+            if (tool !== 'magnifier') {
+                message.textContent = 'It is too small to see. Pick the magnifier.';
+                return;
+            }
+
+            for (let i = 0; i < task.targets.length; i++) {
+                if (getDistance(mouse, task.targets[i]) < 50) {
+                    finishTask(task.lesson);
+                    return;
+                }
+            }
+
+            message.textContent = task.hint;
+        }
+
+        // ----- Next task -----
+
+        function finishTask(lesson) {
+            taskDone = true;
+            message.textContent = lesson;
+
+            if (taskNumber < tasks.length - 1) {
+                nextButton.hidden = false;
+            } else {
+                pictureNumber = skinPictures.length - 1;
+                matchingGameActive = true;
+                toolbar.hidden = true;
+                instructions.textContent = 'Drag each layer label from the tray to its matching layer in the skin.';
+                toFinalButton.hidden = true;
+                putPiecesInTray();
+            }
+
+            drawGame();
+        }
+
+        nextButton.addEventListener('click', function () {
+            taskNumber++;
+            showTask();
+        });
+
+        // ----- Drawing -----
+
+        // Draws everything on the canvas again, from the bottom up
+        function drawGame() {
+            const task = tasks[taskNumber];
+
+            // 1. The skin picture
+            const picture = matchingGameActive || piecesMatched === puzzlePieces.length
+                ? matchingPicture
+                : skinPictures[pictureNumber];
+            if (!picture.complete || picture.naturalWidth === 0) {
+                return;
+            }
+            ctx.drawImage(picture, 0, 0);
+
+            if (matchingGameActive || piecesMatched === puzzlePieces.length) {
+                drawAllPuzzlePieces();
+                return;
+            }
+
+            // 2. The cuts that are already finished
+            ctx.strokeStyle = '#5a0d14';
+            ctx.lineWidth = 6;
+            for (let i = 0; i < oldCuts.length; i++) {
+                drawLineThrough(oldCuts[i]);
+            }
+
+            // 3. The guide for the cut we're on
+            if (task.tool === 'knife' && !taskDone) {
+                drawKnifeGuide(task);
+            }
+
+            // 4. The magnifier
+            if (tool === 'magnifier' && mouseIsOnCanvas) {
+                drawMagnifier();
+            }
+        }
+
+        // ----- Matching game -----
+
+        function putPiecesInTray() {
+            piecesMatched = 0;
+            pieceBeingDragged = null;
+
+            for (let i = 0; i < puzzlePieces.length; i++) {
+                const piece = puzzlePieces[i];
+                piece.isMatched = false;
+                piece.trayX = 15 + i * 170;
+                piece.trayY = 20;
+                piece.x = piece.trayX;
+                piece.y = piece.trayY;
+            }
+        }
+
+        function sendPieceBackToTray(piece) {
+            piece.x = piece.trayX;
+            piece.y = piece.trayY;
+        }
+
+        function isMouseOnPiece(mouse, piece) {
+            const insideLeftAndRight = mouse[0] >= piece.x && mouse[0] <= piece.x + PIECE_WIDTH;
+            const insideTopAndBottom = mouse[1] >= piece.y && mouse[1] <= piece.y + PIECE_HEIGHT;
+            return insideLeftAndRight && insideTopAndBottom;
+        }
+
+        function pickUpPiece(mouse) {
+            for (let i = puzzlePieces.length - 1; i >= 0; i--) {
+                const piece = puzzlePieces[i];
+
+                if (!piece.isMatched && isMouseOnPiece(mouse, piece)) {
+                    pieceBeingDragged = piece;
+                    grabOffsetX = mouse[0] - piece.x;
+                    grabOffsetY = mouse[1] - piece.y;
+                    message.textContent = '';
+                    return;
+                }
+            }
+        }
+
+        function findLayerAtHeight(y) {
+            for (let i = 0; i < skinLayers.length; i++) {
+                if (y >= skinLayers[i].top && y < skinLayers[i].bottom) {
+                    return skinLayers[i].name;
+                }
+            }
+            return null;
+        }
+
+        function dropPiece(piece) {
+            const middleOfPieceY = piece.y + PIECE_HEIGHT / 2;
+            const layerDroppedOn = findLayerAtHeight(middleOfPieceY);
+
+            if (layerDroppedOn === null) {
+                sendPieceBackToTray(piece);
+                return;
+            }
+
+            if (layerDroppedOn === piece.belongsIn) {
+                piece.isMatched = true;
+                piece.x = piece.homeSpot[0];
+                piece.y = piece.homeSpot[1];
+                piecesMatched++;
+                message.textContent = 'Correct! ' + piece.fact;
+
+                if (piecesMatched === puzzlePieces.length) {
+                    matchingGameActive = false;
+                    taskDone = true;
+                    toolbar.hidden = true;
+                    instructions.textContent = 'You explored every layer and matched them all!';
+                    message.textContent = 'Great work! Click “Finish the game” to collect your 30 XP.';
+                    toFinalButton.hidden = false;
+                }
+            } else {
+                sendPieceBackToTray(piece);
+                message.textContent = 'Not the ' + layerDroppedOn + '. ' + piece.wrongLayerHint;
+            }
+        }
+
+        function drawAllPuzzlePieces() {
+            for (let i = 0; i < puzzlePieces.length; i++) {
+                if (puzzlePieces[i] !== pieceBeingDragged) {
+                    drawPuzzlePiece(puzzlePieces[i]);
+                }
+            }
+
+            if (pieceBeingDragged) {
+                drawPuzzlePiece(pieceBeingDragged);
+            }
+        }
+
+        function drawPuzzlePiece(piece) {
+            if (piece.isMatched) {
+                ctx.fillStyle = '#dcfce7';
+                ctx.strokeStyle = '#15803d';
+            } else {
+                ctx.fillStyle = '#fff7d6';
+                ctx.strokeStyle = '#a16207';
+            }
+            ctx.lineWidth = 3;
+
+            ctx.beginPath();
+            ctx.roundRect(piece.x, piece.y, PIECE_WIDTH, PIECE_HEIGHT, 12);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(piece.x + PIECE_WIDTH, piece.y + PIECE_HEIGHT / 2, 12, -Math.PI / 2, Math.PI / 2);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#1f2937';
+            ctx.font = '600 18px Lora, Georgia, serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(piece.words[0], piece.x + PIECE_WIDTH / 2, piece.y + 34);
+            ctx.fillText(piece.words[1], piece.x + PIECE_WIDTH / 2, piece.y + 58);
+            ctx.textAlign = 'start';
+        }
+
+        
+
+        function drawKnifeGuide(task) {
+            const corners = task.cutLine;
+            const start = corners[0];
+            const end = corners[corners.length - 1];
+
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            // The see-through band you have to stay inside
+            ctx.strokeStyle = 'rgba(94, 234, 212, 0.3)';
+            ctx.lineWidth = task.allowedDistance * 2;
+            drawLineThrough(corners);
+
+            // The dotted line down the middle
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([10, 10]);
+            drawLineThrough(corners);
+            ctx.setLineDash([]); // back to solid lines
+
+            // Green start dot
+            ctx.fillStyle = '#34d399';
+            ctx.beginPath();
+            ctx.arc(start[0], start[1], 12, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Yellow end circle
+            ctx.strokeStyle = '#fbbf24';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.arc(end[0], end[1], 16, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // The red line where the knife has been
+            ctx.strokeStyle = '#dc2626';
+            ctx.lineWidth = 5;
+            drawLineThrough(cutLine);
+        }
+
+        function drawLineThrough(points) {
+            if (points.length < 2) {
+                return;
+            }
+
+            ctx.beginPath();
+            ctx.moveTo(points[0][0], points[0][1]);
+            for (let i = 1; i < points.length; i++) {
+                ctx.lineTo(points[i][0], points[i][1]);
+            }
+            ctx.stroke();
+        }
+
+        function drawMagnifier() {
+            const radius = 100;
+            const zoom = 2;
+            const areaSize = (radius * 2) / zoom; // how much of the picture fits in the lens
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(mouseX, mouseY, radius, 0, Math.PI * 2);
+            ctx.clip(); // from here on, only draw inside the circle
+
+            ctx.drawImage(
+                detailsPicture,
+                mouseX - areaSize / 2, mouseY - areaSize / 2, areaSize, areaSize, // the small area around the mouse...
+                mouseX - radius, mouseY - radius, radius * 2, radius * 2           // ...drawn twice as big in the circle
+            );
+            ctx.restore(); // stop clipping
+
+            // White ring around the lens
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.arc(mouseX, mouseY, radius, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+
+        // If the page opened straight on the game, start it
+        if (!gameSection.hidden) {
+            startGame();
+        }
+    </script>
+</body>
+</html>

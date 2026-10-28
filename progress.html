@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learner Progress | AnatoMe</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dosis:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: dark;
+            font-family: "Dosis", Arial, sans-serif;
+            color: #f1f3f8;
+            background: #1d2a3d;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 2rem 1.5rem;
+        }
+
+        main {
+            width: min(100%, 900px);
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        h1,
+        h2 {
+            margin: 0;
+        }
+
+        h1 {
+            color: #fff;
+            font-size: clamp(2rem, 5vw, 3rem);
+        }
+
+        header p {
+            margin: 0.4rem 0 0;
+            color: #e0e7f1;
+            font-size: 1.1rem;
+        }
+
+        a {
+            display: inline-block;
+            padding: 0.7rem 1.1rem;
+            border-radius: 999px;
+            background: #4b8ff7;
+            color: #fff;
+            font-size: 1.05rem;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        a:hover,
+        a:focus-visible {
+            background: #3475dc;
+        }
+
+        a:focus-visible {
+            outline: 3px solid #fff;
+            outline-offset: 3px;
+        }
+
+        #progressSummary {
+            margin: 0 0 1rem;
+            color: #e0e7f1;
+            font-size: 1.15rem;
+        }
+
+        .progress-card {
+            margin: 1rem 0;
+            padding: 1.25rem;
+            border: 1px solid #4a607a;
+            border-radius: 12px;
+            background: #314965;
+        }
+
+        .progress-card h2 {
+            margin-bottom: 0.5rem;
+            font-size: 1.4rem;
+        }
+
+        .help-text {
+            margin: 0 0 1rem;
+            color: #e0e7f1;
+        }
+
+        .graph-row {
+            display: grid;
+            grid-template-columns: minmax(110px, 180px) 1fr auto;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 0.8rem 0;
+            color: #fff;
+            font-size: 1.05rem;
+        }
+
+        progress {
+            width: 100%;
+            height: 1.2rem;
+            accent-color: #55e6d2;
+        }
+
+        .area-highlights {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        .area-highlight {
+            margin: 0;
+            color: #fff;
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        .area-highlight span {
+            display: block;
+            margin-top: 0.25rem;
+            color: #e0e7f1;
+            font-size: 1rem;
+            font-weight: 400;
+        }
+
+        .module-progress {
+            margin: 1rem 0;
+            padding: 1.25rem;
+            border: 1px solid #4a607a;
+            border-radius: 12px;
+            background: #314965;
+        }
+
+        .module-progress h2 {
+            margin-bottom: 0.75rem;
+            font-size: 1.4rem;
+        }
+
+        ol {
+            display: grid;
+            gap: 0.55rem;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        li {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            color: #e8eef7;
+            font-size: 1.05rem;
+        }
+
+        .step-status {
+            margin-left: auto;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .step-status.is-complete {
+            color: #82e5bc;
+        }
+
+        .coming-soon {
+            color: #e0e7f1;
+        }
+
+        @media (max-width: 520px) {
+            .graph-row {
+                grid-template-columns: 1fr auto;
+            }
+
+            .graph-row progress {
+                grid-column: 1 / -1;
+                grid-row: 2;
+            }
+
+            .area-highlights {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <header>
+            <div>
+                <h1>Learner Progress</h1>
+                <p>See your quiz scores, learning steps, and topics to practice.</p>
+            </div>
+            <a href="index.html">Back to Dashboard</a>
+        </header>
+        <p id="progressSummary" aria-live="polite"></p>
+        <section class="progress-card" aria-labelledby="graphTitle">
+            <h2 id="graphTitle">Your progress graph</h2>
+            <p class="help-text">The bars show your best quiz score and how many learning steps you have finished.</p>
+            <div class="graph-row">
+                <span>Best quiz score</span>
+                <progress id="quizScoreGraph" max="100" value="0" aria-label="Best warm-up quiz score"></progress>
+                <strong id="quizScoreValue">No quiz yet</strong>
+            </div>
+            <div class="graph-row">
+                <span>Learning steps</span>
+                <progress id="stepsGraph" max="100" value="0" aria-label="Learning steps completed"></progress>
+                <strong id="stepsValue">0 of 0</strong>
+            </div>
+        </section>
+        <section class="progress-card" aria-labelledby="areasTitle">
+            <h2 id="areasTitle">Your strongest and weakest areas</h2>
+            <p class="help-text">These results are based on the questions you have answered in each topic.</p>
+            <div class="area-highlights">
+                <p class="area-highlight">Strongest area<span id="strongestArea">Take a quiz to see this.</span></p>
+                <p class="area-highlight">Area to practice<span id="weakestArea">Take a quiz to see this.</span></p>
+            </div>
+            <div id="topicGraph" aria-label="Quiz results by topic"></div>
+        </section>
+        <section id="moduleProgressList" aria-label="Progress by module"></section>
+    </main>
+
+    <script>
+        // Find out who is signed in.
+        const accountEmail = localStorage.getItem('anatomeCurrentAccount');
+
+        if (!accountEmail) {
+            window.location.replace('login.html');
+        } else {
+            // Each learner's saved information starts with this text.
+            const accountStoragePrefix = 'anatomeAccountData.'
+                + encodeURIComponent(accountEmail) + '.';
+
+            // These are the modules shown on the dashboard.
+            const modules = [
+                { id: 'tissue-layers', name: 'Tissue Layers', available: true },
+                { id: 'x-ray-bones', name: 'X-Ray Bones', available: false },
+                { id: 'heart-blood-flow', name: 'Blood Flow Through the Heart', available: false },
+                { id: 'airway-tracer', name: 'Airway Tracer', available: false },
+                { id: 'brain-nervous-system', name: 'Brain & Nervous System', available: false }
+            ];
+            const steps = ['Warm-up quiz', 'Interactive game', 'Final quiz'];
+            const topicNames = ['Skin layers', 'Tissue types', 'Skin structures', 'Bone structure'];
+            const progressList = document.getElementById('moduleProgressList');
+            let completedSteps = 0;
+            let availableSteps = 0;
+
+            // Draw one progress card for every module.
+            for (let moduleIndex = 0; moduleIndex < modules.length; moduleIndex++) {
+                const module = modules[moduleIndex];
+                const section = document.createElement('section');
+                section.className = 'module-progress';
+
+                const title = document.createElement('h2');
+                title.textContent = module.name;
+                section.appendChild(title);
+
+                if (!module.available) {
+                    const comingSoon = document.createElement('p');
+                    comingSoon.className = 'coming-soon';
+                    comingSoon.textContent = 'Coming soon';
+                    section.appendChild(comingSoon);
+                    progressList.appendChild(section);
+                    continue;
+                }
+
+                const stepList = document.createElement('ol');
+                for (let stepIndex = 0; stepIndex < steps.length; stepIndex++) {
+                    const isComplete = localStorage.getItem(
+                        accountStoragePrefix + 'moduleProgress.' + module.id + '.' + stepIndex
+                    ) === 'true';
+                    const item = document.createElement('li');
+                    const label = document.createElement('span');
+                    const status = document.createElement('span');
+
+                    label.textContent = steps[stepIndex];
+                    status.className = 'step-status' + (isComplete ? ' is-complete' : '');
+                    status.textContent = isComplete ? 'Completed' : 'Not completed';
+                    item.append(label, status);
+                    stepList.appendChild(item);
+
+                    availableSteps++;
+                    if (isComplete) {
+                        completedSteps++;
+                    }
+                }
+
+                section.appendChild(stepList);
+                progressList.appendChild(section);
+            }
+
+            // Show a short summary and fill in the learning-steps graph.
+            document.getElementById('progressSummary').textContent =
+                completedSteps + ' of ' + availableSteps + ' available learning steps completed.';
+
+            const stepsGraph = document.getElementById('stepsGraph');
+            const stepsValue = document.getElementById('stepsValue');
+            let stepPercent = 0;
+
+            if (availableSteps > 0) {
+                stepPercent = Math.round(completedSteps / availableSteps * 100);
+            }
+
+            stepsGraph.value = stepPercent;
+            stepsValue.textContent = completedSteps + ' of ' + availableSteps;
+
+            // Show the learner's best warm-up quiz result.
+            const quizProgressKey = accountStoragePrefix + 'moduleProgress.tissue-layers';
+            const bestQuizScore = localStorage.getItem(quizProgressKey + '.warmupBestScore');
+            const quizQuestionCount = localStorage.getItem(quizProgressKey + '.warmupQuestionCount');
+            const quizScoreGraph = document.getElementById('quizScoreGraph');
+            const quizScoreValue = document.getElementById('quizScoreValue');
+
+            if (bestQuizScore !== null && quizQuestionCount !== null) {
+                const quizPercent = Math.round(Number(bestQuizScore) / Number(quizQuestionCount) * 100);
+                quizScoreGraph.value = quizPercent;
+                quizScoreValue.textContent = bestQuizScore + ' of ' + quizQuestionCount
+                    + ' (' + quizPercent + '%)';
+            }
+
+            // Read the saved right and wrong answers for each topic.
+            const savedTopicScores = JSON.parse(
+                localStorage.getItem(quizProgressKey + '.topicScores') || '{}'
+            );
+            const topicGraph = document.getElementById('topicGraph');
+            let strongestTopics = [];
+            let weakestTopics = [];
+            let strongestPercent = -1;
+            let weakestPercent = 101;
+
+            // Draw a graph bar for every topic that has quiz answers saved.
+            for (let topicIndex = 0; topicIndex < topicNames.length; topicIndex++) {
+                const topicName = topicNames[topicIndex];
+                const topicScore = savedTopicScores[topicName];
+
+                if (!topicScore || topicScore.total === 0) {
+                    continue;
+                }
+
+                const topicPercent = Math.round(topicScore.correct / topicScore.total * 100);
+                const graphRow = document.createElement('div');
+                graphRow.className = 'graph-row';
+
+                const topicLabel = document.createElement('span');
+                topicLabel.textContent = topicName;
+
+                const topicBar = document.createElement('progress');
+                topicBar.max = 100;
+                topicBar.value = topicPercent;
+                topicBar.setAttribute('aria-label', topicName + ' quiz accuracy');
+
+                const topicResult = document.createElement('strong');
+                topicResult.textContent = topicScore.correct + ' of ' + topicScore.total
+                    + ' (' + topicPercent + '%)';
+
+                graphRow.append(topicLabel, topicBar, topicResult);
+                topicGraph.appendChild(graphRow);
+
+                if (topicPercent > strongestPercent) {
+                    strongestPercent = topicPercent;
+                    strongestTopics = [topicName];
+                } else if (topicPercent === strongestPercent) {
+                    strongestTopics.push(topicName);
+                }
+
+                if (topicPercent < weakestPercent) {
+                    weakestPercent = topicPercent;
+                    weakestTopics = [topicName];
+                } else if (topicPercent === weakestPercent) {
+                    weakestTopics.push(topicName);
+                }
+            }
+
+            // Show all tied topics so a tie is not presented as a single winner.
+            if (strongestTopics.length > 0) {
+                document.getElementById('strongestArea').textContent =
+                    strongestTopics.join(', ') + ' (' + strongestPercent + '% correct)';
+
+                if (strongestPercent === weakestPercent) {
+                    document.getElementById('weakestArea').textContent =
+                        'All topics are tied (' + weakestPercent + '% correct)';
+                } else {
+                    document.getElementById('weakestArea').textContent =
+                        weakestTopics.join(', ') + ' (' + weakestPercent + '% correct)';
+                }
+            } else {
+                topicGraph.textContent = 'Answer quiz questions to see your topic graph.';
+            }
+        }
+    </script>
+</body>
+</html>
